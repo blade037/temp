@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTC to EST Time Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        
+        :root {
+            --primary: #0ea5e9;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .font-display {
+            font-family: 'Space Grotesk', 'Inter', system_ui, sans-serif;
+            font-weight: 600;
+        }
+
+        .time-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .converter-input {
+            transition: all 0.2s ease;
+        }
+
+        .converter-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .result-box {
+            background: linear-gradient(145deg, #f8fafc, #e0e7ff);
+            transition: all 0.3s ease;
+        }
+
+        .section-header {
+            font-size: 1.1rem;
+            letter-spacing: -.025em;
+        }
+
+        .time-value {
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timezone-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <div class="flex items-center gap-x-3">
+                    <div class="w-11 h-11 bg-indigo-500 rounded-2xl flex items-center justify-center shadow-inner">
+                        <i class="fa-solid fa-clock text-white text-3xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-display tracking-tighter text-slate-900">UTC → EST</h1>
+                        <p class="text-slate-500 text-sm">Time Zone Converter</p>
+                    </div>
+                </div>
+            </div>
+            <div class="hidden sm:flex items-center gap-x-2 text-xs px-3 py-1.5 bg-white rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-x-1.5">
+                    <i class="fa-solid fa-globe text-emerald-500"></i>
+                    <span class="font-medium text-slate-600">Live • Accurate</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Important Note -->
+        <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-3xl text-sm">
+            <div class="flex gap-x-3">
+                <i class="fa-solid fa-info-circle text-amber-500 mt-0.5"></i>
+                <div class="text-amber-800 text-[13px]">
+                    <strong>UTC (Coordinated Universal Time)</strong> is the global time standard (UTC+0). 
+                    This converter shows the equivalent time in <strong>EST / EDT</strong> (Eastern Time / America/New_York), 
+                    which automatically handles Daylight Saving Time (EDT = UTC-4 in summer, EST = UTC-5 in winter).
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Times -->
+        <div class="mb-8">
+            <h2 class="section-header font-semibold text-slate-700 mb-3 px-1 flex items-center gap-x-2">
+                <i class="fa-solid fa-globe text-slate-400"></i> 
+                <span>Current Times</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Current UTC -->
+                <div class="time-card bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <div class="flex items-center gap-x-2">
+                                <i class="fa-solid fa-globe text-emerald-500"></i>
+                                <span class="font-semibold text-slate-700">UTC (Coordinated Universal Time)</span>
+                            </div>
+                            <div class="timezone-label text-emerald-600 font-medium tracking-wider">COORDINATED UNIVERSAL TIME</div>
+                        </div>
+                        <div class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-2xl">UTC+0</div>
+                    </div>
+                    <div id="current-utc" 
+                         class="time-value text-4xl font-semibold text-slate-900 tracking-tighter tabular-nums">
+                        --:--:--
+                    </div>
+                    <div id="current-utc-date" class="text-sm text-slate-500 mt-1"></div>
+                </div>
+
+                <!-- Current EST / EDT -->
+                <div class="time-card bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <div class="flex items-center gap-x-2">
+                                <i class="fa-solid fa-building text-indigo-500"></i>
+                                <span class="font-semibold text-slate-700">EST / EDT</span>
+                            </div>
+                            <div class="timezone-label text-indigo-600 font-medium tracking-wider">EASTERN TIME</div>
+                        </div>
+                        <div class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-2xl">UTC-5 / -4</div>
+                    </div>
+                    <div id="current-est" 
+                         class="time-value text-4xl font-semibold text-slate-900 tracking-tighter tabular-nums">
+                        --:--:--
+                    </div>
+                    <div id="current-est-date" class="text-sm text-slate-500 mt-1"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Converter -->
+        <div class="bg-white border border-slate-200 shadow-sm rounded-3xl p-6">
+            <h2 class="section-header font-semibold text-slate-700 mb-5 px-1 flex items-center gap-x-2">
+                <i class="fa-solid fa-exchange-alt text-indigo-500"></i> 
+                <span>Convert Time</span>
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- UTC to EST -->
+                <div class="border border-slate-100 rounded-2xl p-5 bg-slate-50/70">
+                    <div class="flex items-center gap-x-2 mb-4">
+                        <div class="w-8 h-8 flex-shrink-0 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center">
+                            <i class="fa-solid fa-globe text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-slate-700">From UTC (Coordinated Universal Time)</div>
+                            <div class="text-xs text-emerald-600">Enter time in UTC</div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1.5 px-1">DATE &amp; TIME (UTC)</label>
+                            <input type="datetime-local" id="utc-input" 
+                                   class="converter-input w-full px-4 py-3 border border-slate-300 focus:border-indigo-400 rounded-2xl text-sm font-medium bg-white">
+                        </div>
+                        
+                        <button onclick="convertUTCtoEST()" 
+                                class="w-full flex items-center justify-center gap-x-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 transition-colors text-white font-semibold py-3 px-5 rounded-2xl text-sm shadow-inner">
+                            <i class="fa-solid fa-arrow-right"></i>
+                            <span>Convert to EST / EDT</span>
+                        </button>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1.5 px-1">RESULT IN EASTERN TIME</label>
+                            <div id="est-result" 
+                                 class="result-box min-h-[58px] px-4 py-3.5 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 flex items-center">
+                                <span class="text-slate-400">— Enter a time above —</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EST to UTC -->
+                <div class="border border-slate-100 rounded-2xl p-5 bg-slate-50/70">
+                    <div class="flex items-center gap-x-2 mb-4">
+                        <div class="w-8 h-8 flex-shrink-0 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center">
+                            <i class="fa-solid fa-building text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-slate-700">From EST / EDT</div>
+                            <div class="text-xs text-indigo-600">Enter time in Eastern Time</div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1.5 px-1">DATE &amp; TIME (EASTERN)</label>
+                            <input type="datetime-local" id="est-input" 
+                                   class="converter-input w-full px-4 py-3 border border-slate-300 focus:border-indigo-400 rounded-2xl text-sm font-medium bg-white">
+                        </div>
+                        
+                        <button onclick="convertESTtoUTC()" 
+                                class="w-full flex items-center justify-center gap-x-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 transition-colors text-white font-semibold py-3 px-5 rounded-2xl text-sm shadow-inner">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Convert to UTC</span>
+                        </button>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1.5 px-1">RESULT IN UTC</label>
+                            <div id="utc-result" 
+                                 class="result-box min-h-[58px] px-4 py-3.5 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 flex items-center">
+                                <span class="text-slate-400">— Enter a time above —</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Info -->
+            <div class="mt-6 pt-5 border-t border-slate-100 text-xs text-slate-500 px-1">
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <div class="flex items-center gap-x-1.5">
+                        <i class="fa-solid fa-info-circle"></i>
+                        <span>Eastern Time automatically adjusts for Daylight Saving Time</span>
+                    </div>
+                    <div class="hidden sm:block text-slate-300">•</div>
+                    <div>
+                        Typical offset: <span class="font-medium text-slate-600">UTC − 5 hours</span> (standard) / <span class="font-medium text-slate-600">UTC − 4 hours</span> (DST)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer note -->
+        <div class="mt-6 text-center">
+            <p class="text-xs text-slate-400">
+                Built with accurate IANA time zone data • Updates every second for current time
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Tailwind script
+        function initializeTailwind() {
+            document.documentElement.style.setProperty('--accent', '#6366f1');
+        }
+
+        // Update current times every second
+        function updateCurrentTimes() {
+            const now = new Date();
+
+            // Current UTC
+            const utcTimeStr = now.toLocaleTimeString('en-US', {
+                timeZone: 'UTC',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            
+            const utcDateStr = now.toLocaleDateString('en-US', {
+                timeZone: 'UTC',
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            document.getElementById('current-utc').innerHTML = utcTimeStr;
+            document.getElementById('current-utc-date').innerHTML = utcDateStr;
+
+            // Current EST / EDT (America/New_York)
+            const estTimeStr = now.toLocaleTimeString('en-US', {
+                timeZone: 'America/New_York',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            
+            const estDateStr = now.toLocaleDateString('en-US', {
+                timeZone: 'America/New_York',
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            document.getElementById('current-est').innerHTML = estTimeStr;
+            document.getElementById('current-est-date').innerHTML = estDateStr;
+        }
+
+        // Convert UTC to EST/EDT
+        function convertUTCtoEST() {
+            const input = document.getElementById('utc-input').value;
+            const resultEl = document.getElementById('est-result');
+            
+            if (!input) {
+                resultEl.innerHTML = `<span class="text-red-400">Please select a date and time</span>`;
+                return;
+            }
+
+            try {
+                // Parse the datetime-local value as UTC
+                const [datePart, timePart] = input.split('T');
+                const [year, month, day] = datePart.split('-').map(Number);
+                const [hour, minute] = timePart.split(':').map(Number);
+
+                // Create a proper UTC Date object
+                const utcDate = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+                // Convert to Eastern Time using America/New_York
+                const estFormatted = utcDate.toLocaleString('en-US', {
+                    timeZone: 'America/New_York',
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                    timeZoneName: 'short'
+                });
+
+                resultEl.innerHTML = `
+                    <div class="flex items-baseline justify-between w-full">
+                        <div>
+                            <div class="font-semibold text-lg text-slate-900">${estFormatted}</div>
+                        </div>
+                        <button onclick="copyToClipboard('${estFormatted.replace(/'/g, "\\'")}', this)" 
+                                class="ml-3 text-xs px-3 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-700 rounded-xl flex items-center gap-x-1 transition-colors">
+                            <i class="fa-solid fa-copy text-xs"></i>
+                            <span class="hidden sm:inline text-[10px]">Copy</span>
+                        </button>
+                    </div>
+                `;
+            } catch (e) {
+                resultEl.innerHTML = `<span class="text-red-400">Invalid date/time format</span>`;
+            }
+        }
+
+        // Convert EST/EDT to UTC
+        function convertESTtoUTC() {
+            const input = document.getElementById('est-input').value;
+            const resultEl = document.getElementById('utc-result');
+            
+            if (!input) {
+                resultEl.innerHTML = `<span class="text-red-400">Please select a date and time</span>`;
+                return;
+            }
+
+            try {
+                // Parse input as Eastern time (America/New_York)
+                const [datePart, timePart] = input.split('T');
+                const [year, month, day] = datePart.split('-').map(Number);
+                const [hour, minute] = timePart.split(':').map(Number);
+
+                // Create date string for the Eastern wall time
+                const estString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`;
+                
+                // Create a temporary date
+                const tempDate = new Date(estString);
+                
+                // Get the timezone offset for America/New_York at this date (in ms)
+                const tzOffsetMs = getTimezoneOffset('America/New_York', tempDate);
+                
+                // UTC = Eastern wall time - offset
+                const actualUTC = new Date(tempDate.getTime() - tzOffsetMs);
+
+                const utcFormatted = actualUTC.toLocaleString('en-US', {
+                    timeZone: 'UTC',
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                    timeZoneName: 'short'
+                });
+
+                resultEl.innerHTML = `
+                    <div class="flex items-baseline justify-between w-full">
+                        <div>
+                            <div class="font-semibold text-lg text-slate-900">${utcFormatted}</div>
+                        </div>
+                        <button onclick="copyToClipboard('${utcFormatted.replace(/'/g, "\\'")}', this)" 
+                                class="ml-3 text-xs px-3 py-1 bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-700 rounded-xl flex items-center gap-x-1 transition-colors">
+                            <i class="fa-solid fa-copy text-xs"></i>
+                            <span class="hidden sm:inline text-[10px]">Copy</span>
+                        </button>
+                    </div>
+                `;
+            } catch (e) {
+                resultEl.innerHTML = `<span class="text-red-400">Invalid date/time format</span>`;
+            }
+        }
+
+        // Helper to get timezone offset in milliseconds for a specific zone and date
+        function getTimezoneOffset(timeZone, date) {
+            const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+            const tzDate = new Date(date.toLocaleString('en-US', { timeZone }));
+            return tzDate.getTime() - utcDate.getTime();
+        }
+
+        // Copy to clipboard helper
+        function copyToClipboard(text, buttonElement) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHTML = buttonElement.innerHTML;
+                buttonElement.innerHTML = `<i class="fa-solid fa-check text-emerald-500"></i> <span class="hidden sm:inline text-[10px]">Copied!</span>`;
+                buttonElement.disabled = true;
+                
+                setTimeout(() => {
+                    buttonElement.innerHTML = originalHTML;
+                    buttonElement.disabled = false;
+                }, 1800);
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const originalHTML = buttonElement.innerHTML;
+                buttonElement.innerHTML = `<i class="fa-solid fa-check text-emerald-500"></i>`;
+                setTimeout(() => {
+                    buttonElement.innerHTML = originalHTML;
+                }, 1500);
+            });
+        }
+
+        // Set default datetime values to now (in respective zones)
+        function setDefaultDateTimes() {
+            const now = new Date();
+            
+            // For UTC input - set to current UTC time
+            const utcNow = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
+            const utcInput = document.getElementById('utc-input');
+            if (utcInput) {
+                const utcYear = utcNow.getFullYear();
+                const utcMonth = String(utcNow.getMonth() + 1).padStart(2, '0');
+                const utcDay = String(utcNow.getDate()).padStart(2, '0');
+                const utcHour = String(utcNow.getHours()).padStart(2, '0');
+                const utcMinute = String(utcNow.getMinutes()).padStart(2, '0');
+                utcInput.value = `${utcYear}-${utcMonth}-${utcDay}T${utcHour}:${utcMinute}`;
+            }
+            
+            // For EST input - set to current Eastern time
+            const estNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+            const estInput = document.getElementById('est-input');
+            if (estInput) {
+                const estYear = estNow.getFullYear();
+                const estMonth = String(estNow.getMonth() + 1).padStart(2, '0');
+                const estDay = String(estNow.getDate()).padStart(2, '0');
+                const estHour = String(estNow.getHours()).padStart(2, '0');
+                const estMinute = String(estNow.getMinutes()).padStart(2, '0');
+                estInput.value = `${estYear}-${estMonth}-${estDay}T${estHour}:${estMinute}`;
+            }
+        }
+
+        // Initialize everything
+        function initialize() {
+            initializeTailwind();
+            
+            // Start live clock
+            updateCurrentTimes();
+            setInterval(updateCurrentTimes, 1000);
+            
+            // Set default values in inputs
+            setDefaultDateTimes();
+            
+            // Allow pressing Enter in inputs to convert
+            const utcInput = document.getElementById('utc-input');
+            const estInput = document.getElementById('est-input');
+            
+            if (utcInput) {
+                utcInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') convertUTCtoEST();
+                });
+            }
+            
+            if (estInput) {
+                estInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') convertESTtoUTC();
+                });
+            }
+            
+            // Bonus: clicking on current time cards copies them
+            const utcCard = document.getElementById('current-utc');
+            if (utcCard) {
+                utcCard.style.cursor = 'pointer';
+                utcCard.title = 'Click to copy current UTC time';
+                utcCard.addEventListener('click', () => {
+                    const text = document.getElementById('current-utc').textContent + ' UTC';
+                    navigator.clipboard.writeText(text);
+                    const origColor = utcCard.style.color;
+                    utcCard.style.color = '#10b981';
+                    setTimeout(() => utcCard.style.color = origColor, 600);
+                });
+            }
+            
+            const estCard = document.getElementById('current-est');
+            if (estCard) {
+                estCard.style.cursor = 'pointer';
+                estCard.title = 'Click to copy current Eastern time';
+                estCard.addEventListener('click', () => {
+                    const text = document.getElementById('current-est').textContent + ' ET';
+                    navigator.clipboard.writeText(text);
+                    const origColor = estCard.style.color;
+                    estCard.style.color = '#6366f1';
+                    setTimeout(() => estCard.style.color = origColor, 600);
+                });
+            }
+            
+            // Show welcome toast on first load (subtle)
+            setTimeout(() => {
+                console.log('%c[UTC→EST Converter] Ready. All conversions use accurate IANA timezone data.', 'color:#64748b');
+            }, 1200);
+        }
+
+        // Boot the app
+        window.onload = initialize;
+    </script>
+</body>
+</html>
